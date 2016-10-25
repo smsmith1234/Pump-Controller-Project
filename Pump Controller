@@ -25,6 +25,22 @@ void before()
   sensors.begin();
 }
 
+void setup()
+{
+  // requestTemperatures() will not block current thread
+  sensors.setWaitForConversion(false);
+}
+
+void presentation()
+{
+  //Send sketch version to gateway and controller
+  sendSketchInfo("Custom Sensor","1.1");
+
+  // Fetch the number of attached Dallas Sensors
+  numSensors=sensors.getDeviceCount();
+  
+  
+
 #define PRESSURE_BUS 5
 
 
