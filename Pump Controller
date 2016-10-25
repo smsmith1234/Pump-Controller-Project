@@ -37,10 +37,20 @@ void presentation()
   sendSketchInfo("Custom Sensor","1.1");
 
   // Fetch the number of attached Dallas Sensors
-  numSensors=sensors.getDeviceCount();
+  numSensors=sensors.getDeviceCount();  
   
-  
-
 #define PRESSURE_BUS 5
 
+// Present all sensore to controller
+present(0,S_BINARY); // Pump status (On/Off)
+present(1, S_CUSTOM); // Pump pressure (PSI)
+for(int i=2; i<numSensors+2 && i<MAX_ATTACHED_DS18B20; i++){ // 
+  present(i, S_TEMP);
+  }
+}
+
+void()
+{
+// Fetch temperatures from dallas sensors
+sensors.requestTemperature();
 
