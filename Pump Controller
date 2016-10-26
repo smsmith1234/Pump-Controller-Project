@@ -23,7 +23,7 @@ bool receivedConfig=false;
 
 //initialize temperature, water and binary messages
 MyMessage msgTemp(CHILD_ID_TEMP, V_TEMP);
-MyMessage msgWater(CHILD_ID_PRESSURE, V_FLOW, V_VOLUME);
+MyMessage msgWater(CHILD_ID_WATER, V_FLOW, V_VOLUME);
 MyMessage msgBinary(CHILD_ID_BINARY, V_STATUS, V_WATT);
 
 void before()
@@ -47,25 +47,25 @@ void presentation()
   //  numSensors=sensors.getDeviceCount();  
 
   // Present all sensors to controller
-  present(0, S_TEMP); // Temperature
-  present(1, S_WATER); // Pump pressure (PSI) and null
-  present(2, S_BINARY); // Pump status and error number
+  present(CHILD_ID_TEMP, S_TEMP); // Temperature
+  present(CHILD_ID_WATER, S_WATER); // Pump pressure (PSI) and null
+  present(CHILD_ID_BINARY, S_BINARY); // Pump status and error number
 
 }
 
 void loop()
 {
-// Fetch temperatures from dallas sensors
-sensors.requestTemperature();
+  // Fetch temperatures from dallas sensors
+  sensors.requestTemperature();
 
-// Query conversion time and wait until conversion is complete
-int16_t conversionTime = sensors.millisToWaitForConversion(sensors.getResolution());
-wait(conversionTime);
+  // Query conversion time and wait until conversion is complete
+  int16_t conversionTime = sensors.millisToWaitForConversion(sensors.getResolution());
+  wait(conversionTime);
 
-// Read temperatures and send them to the controller
-float temperature = static_cast<float>(static_cast<int>((getConfig().isMetric?sensors.getTempCByIndex(i);sensors.getTempFByIndex(i))*10.00/10.;
+  // Read temperatures and send them to the controller
+  float temperature = static_cast<float>(static_cast<int>((getConfig().isMetric?sensors.getTempCByIndex(0);sensors.getTempFByIndex(0))  *10.00/10.;
     
-// Only send if temperature has changed and no error
+  // Only send if temperature has changed and no error
     #if COMPARE_TEMP == 1
     if (lastTemperature != temperature && temperature != -127.00 && temperature != 85.00){
     #else
@@ -73,9 +73,9 @@ float temperature = static_cast<float>(static_cast<int>((getConfig().isMetric?se
     #endif
     
     // Send in the new temperature
-    send(msgTemp.setSensor(i).set(temperature,1));
+    send(msgTemp.set(temperature));
     // Save new temperature for next compare
-    lastTemperature[i] = temperature;
+    lastTemperature = temperature;
     }
   }
   wait(SLEEP_TIME);
