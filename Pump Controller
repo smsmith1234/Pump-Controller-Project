@@ -76,6 +76,14 @@ void loop()
     send(msgTemp.set(temperature));
     // Save new temperature for next compare
     lastTemperature = temperature;
+    
+    // Send pump run status and error condition
+    send(msgBinary.set(pumpStatus, pumpError));
+    
+    // Send pump pressure
+    send(msgWater.set(pumpPressure));
+    
+    
     }
   }
   wait(SLEEP_TIME);
