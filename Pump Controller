@@ -7,17 +7,24 @@
 
 #define COMPARE_TEMP 1
 
+#define CHILD_ID_TEMP 0
+#define CHILD_ID_WATER 1
+#define CHILD_ID_BINARY 2
+
 #define ONE_WIRE_BUS 3
-#define MAX_ATTACHED_DS18B20 16
+#define PRESSURE_BUS 5
+
 unsigned long SLEEP_TIME= 30000;
 OneWire onewire(ONE_WIRE_BUS);
 DallasTemperature sensors(&onewire);
-float lasttemperature[MAX_ATTACHED_DS18B20];
+float lasttemperature = 0;
 int numSensors=0;
 bool receivedConfig=false;
 
-//initialize temperature message
-MyMessage msg(0,V_TEMP);
+//initialize temperature, water and binary messages
+MyMessage msgTemp(CHILD_ID_TEMP, V_TEMP);
+MyMessage msgWater(CHILD_ID_PRESSURE, V_FLOW, V_VOLUME);
+MyMessage msgBinary(CHILD_ID_BINARY, V_STATUS, V_WATT);
 
 void before()
 {
@@ -33,20 +40,17 @@ void setup()
 
 void presentation()
 {
-  //Send sketch version to gateway and controller
-  sendSketchInfo("Custom Sensor","1.1");
+  // Send sketch version to gateway and controller
+  sendSketchInfo("Water Sensor","1.1");
 
   // Fetch the number of attached Dallas Sensors
-  numSensors=sensors.getDeviceCount();  
-  
-#define PRESSURE_BUS 5
+  //  numSensors=sensors.getDeviceCount();  
 
-// Present all sensore to controller
-present(0,S_BINARY); // Pump status (On/Off)
-present(1, S_CUSTOM); // Pump pressure (PSI)
-for(int i=2; i<numSensors+2 && i<MAX_ATTACHED_DS18B20; i++){ // 
-  present(i, S_TEMP);
-  }
+  // Present all sensors to controller
+  present(0, S_TEMP); // Temperature
+  present(1, S_WATER); // Pump pressure (PSI) and null
+  present(2, S_BINARY); // Pump status and error number
+
 }
 
 void loop()
@@ -59,18 +63,17 @@ int16_t conversionTime = sensors.millisToWaitForConversion(sensors.getResolution
 wait(conversionTime);
 
 // Read temperatures and send them to the controller
-for(int i=0; i<numSensors && i<MAX_ATTACHED_DS18B20; i++){
-    float temperature = static_cast<float>(static_cast<int>((getConfig().isMetric?sensors.getTempCByIndex(i);sensors.getTempFByIndex(i))*10.00/10.;
+float temperature = static_cast<float>(static_cast<int>((getConfig().isMetric?sensors.getTempCByIndex(i);sensors.getTempFByIndex(i))*10.00/10.;
     
-    // Only send if temperature has changed and no error
+// Only send if temperature has changed and no error
     #if COMPARE_TEMP == 1
-    if (lastTemperature(i) != temperature && temperature != -127.00 && temperature != 85.00){
+    if (lastTemperature != temperature && temperature != -127.00 && temperature != 85.00){
     #else
     if (temperature != -127.00 && temperature != 85.00){
     #endif
     
     // Send in the new temperature
-    send(msg.setSensor(i).set(temperature,1));
+    send(msgTemp.setSensor(i).set(temperature,1));
     // Save new temperature for next compare
     lastTemperature[i] = temperature;
     }
