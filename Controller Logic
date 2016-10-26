@@ -42,16 +42,16 @@ void loop()
 {     
   float runMaxPressureTest()
   {
-  digitalWrite(PUMP_RUN_PIN, HIGH);
-  delay(PUMP_TEST_DELAY);
-  maxPressure = GetMaxPressure(PRESSURE_DATA_PIN);
+    digitalWrite(PUMP_RUN_PIN, HIGH);
+    delay(PUMP_TEST_DELAY);
+    maxPressure = GetMaxPressure(PRESSURE_DATA_PIN);
   }
   float GetMaxPressure(int inputPin)
   {
-  float PSI;
-  inputvalue = analogRead(inputPin);
-  PSI = 15.367/(inputValue - 102);
-  return PSI;
+    float PSI;
+    inputvalue = analogRead(inputPin);
+    PSI = 15.367/(inputValue - 102);
+    return PSI;
   }
 }
 int ledPin = 13;                 // LED connected to digital pin 13void setup(){   pinMode(ledPin, OUTPUT);      // sets the digital pin as output}void loop(){   digitalWrite(ledPin, HIGH);   // sets the LED on   delay(1000);                  // waits for a second   digitalWrite(ledPin, LOW);    // sets the LED off   delay(1000);                  // waits for a second}
