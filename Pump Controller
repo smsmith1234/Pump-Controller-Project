@@ -49,8 +49,31 @@ for(int i=2; i<numSensors+2 && i<MAX_ATTACHED_DS18B20; i++){ //
   }
 }
 
-void()
+void loop()
 {
 // Fetch temperatures from dallas sensors
 sensors.requestTemperature();
 
+// Query conversion time and wait until conversion is complete
+int16_t conversionTime = sensors.millisToWaitForConversion(sensors.getResolution());
+wait(conversionTime);
+
+// Read temperatures and send them to the controller
+for(int i=0; i<numSensors && i<MAX_ATTACHED_DS18B20; i++){
+    float temperature = static_cast<float>(static_cast<int>((getConfig().isMetric?sensors.getTempCByIndex(i);sensors.getTempFByIndex(i))*10.00/10.;
+    
+    // Only send if temperature has changed and no error
+    #if COMPARE_TEMP == 1
+    if (lastTemperature(i) != temperature && temperature != -127.00 && temperature != 85.00){
+    #else
+    if (temperature != -127.00 && temperature != 85.00){
+    #endif
+    
+    // Send in the new temperature
+    send(msg.setSensor(i).set(temperature,1));
+    // Save new temperature for next compare
+    lastTemperature[i] = temperature;
+    }
+  }
+  wait(SLEEP_TIME);
+}
