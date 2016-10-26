@@ -1,1 +1,57 @@
 //This file controls the pump operation
+
+#define const uint64_t PRESSURE_TEST_INTERVAL 60000
+#define PRESSURE_DATA_PIN 3
+#define PUMP_RUN_PIN 9
+#define PUMP_TEST_DELAY 5000
+//#define ONE_WIRE_BUS 3 // Pin where dallas sensor is connected 
+
+#include <SPI.h>
+//#include <DallasTemperature.h>
+//#include <OneWire.h>
+
+
+uint64_t timeIdle = 0;
+int overTempCount = 0;
+float maxPressure = 0;
+float HPCutoff = 0;
+float lastTemperature = 0;
+
+bool highPressureError = false;
+bool lowPressureError = false;
+bool overTempError = false;
+
+//OneWire oneWire(ONE_WIRE_BUS); // Setup a oneWire instance to communicate with any OneWire devices (not just Maxim/Dallas temperature ICs)
+//DallasTemperature sensors(&oneWire); // Pass the oneWire reference to Dallas Temperature.
+
+void before()
+{
+  // Startup up the OneWire library
+  //sensors.begin();
+}
+
+void setup()  
+{ 
+  // requestTemperatures() will not block current thread
+  //sensors.setWaitForConversion(false);
+  // set up pins
+  pinMode(PRESSURE_DATA_PIN, INPUT);
+  pinMode(PUMP_RUN_PIN, OUTPUT);
+}
+void loop()     
+{     
+  float runMaxPressureTest()
+  {
+  digitalWrite(PUMP_RUN_PIN, HIGH);
+  delay(PUMP_TEST_DELAY);
+  maxPressure = GetMaxPressure(PRESSURE_DATA_PIN);
+  }
+  float GetMaxPressure(int inputPin)
+  {
+  float PSI;
+  inputvalue = analogRead(inputPin);
+  PSI = 15.367/(inputValue - 102);
+  return PSI;
+  }
+}
+int ledPin = 13;                 // LED connected to digital pin 13void setup(){   pinMode(ledPin, OUTPUT);      // sets the digital pin as output}void loop(){   digitalWrite(ledPin, HIGH);   // sets the LED on   delay(1000);                  // waits for a second   digitalWrite(ledPin, LOW);    // sets the LED off   delay(1000);                  // waits for a second}
