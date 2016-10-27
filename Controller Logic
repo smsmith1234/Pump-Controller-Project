@@ -4,7 +4,8 @@
 #define PRESSURE_DATA_PIN 3
 #define PUMP_RUN_PIN 9
 #define PUMP_TEST_DELAY 5000
-//#define ONE_WIRE_BUS 3 // Pin where dallas sensor is connected 
+#define MIN_PRESSURE 10
+#define ONE_WIRE_BUS 3 // Pin where dallas sensor is connected 
 
 #include <SPI.h>
 #include <DallasTemperature.h>
@@ -14,7 +15,9 @@
 uint64_t timeIdle = 0;
 int overTempCount = 0;
 float maxPressure = 0;
+float pressure = 0;
 float HPCutOff = 0;
+float temperature = 0;
 float lastTemperature = 0;
 
 bool highPressureError = false;
@@ -39,69 +42,65 @@ void setup()
 
 void loop()     
 {     
-  If(highPressureError == false && lowPressureError == false && overTempError == false){
-    pressure = getPressure(PRESSURE_DATA_PIN);
-    temperature = getTemperature(PRESSURE_DATA_PIN);
-    If(pumpOn = false){
-    idleTime++;}
-    else{
-      If(temperature <= lastTemperature){
-        overTempCount++;
-      }
-      else{
-        overTempCount--; 
-      }
-    switch(pressure){
-      case > maxPressure:
-        digitalWrite(PUMP_RUN_PIN, LOW);
-        highPressureError = true;
-        break;
-      case < MIN_PRESSURE:
-        digitalWrite(PUMP_RUN_PIN, LOW);
-        lowPressureError = true;
-        break;
-      case > HPCutoff:
-        delay(3000);
-        digitalWrite(PUMP_RUN_PIN, LOW);
-        break;
-      case < LPTurnOn:
-        digitalWrite(PUMP_RUN_PIN, HIGH);
-        delay(3000);
-        break;
-      default:
-        break;
-    }
+    If(highPressureError == false && lowPressureError == false && overTempError == false){
+        pressure = getPressure(PRESSURE_DATA_PIN);
+        temperature = getTemperature(PRESSURE_DATA_PIN);
+        If(digitalRead(PUMP_RUN_PIN = false){
+            idleTime++;
+            }
+        else{
+            If(temperature <= lastTemperature){
+                overTempCount++;
+                }
+            else{
+                overTempCount--; 
+                }
+        }
+        switch(pressure){
+            case > maxPressure:
+                digitalWrite(PUMP_RUN_PIN, LOW);
+                highPressureError = true;
+                break;
+            case < MIN_PRESSURE:
+                digitalWrite(PUMP_RUN_PIN, LOW);
+                lowPressureError = true;
+                break;
+            case > HPCutOff:
+                delay(3000);
+                digitalWrite(PUMP_RUN_PIN, LOW);
+                break;
+            case < LPTurnOn:
+                digitalWrite(PUMP_RUN_PIN, HIGH);
+                delay(3000);
+                break;
+            default:
+                break;
+        }
     
-    if(overTempCount > 5){
-      digitalWrite(PUMP_RUN_PIN, LOW);
-      overTempError = true;
-    elseif(overTempCount < 0){
-      overTempCount = 0;
-    }
+        if(overTempCount > 5){
+            digitalWrite(PUMP_RUN_PIN, LOW);
+            overTempError = true;
+            }
+        elseif(overTempCount < 0){
+            overTempCount = 0;
+            }
+        delay(1000);
  
- delay(1000);
- 
- if(timeIdle >= PRESSURE_TEST_INTERVAL){
-      maxPressure = getMaxPressure;
-      HPCutOff = maxPressure * .9;
+        if(timeIdle >= PRESSURE_TEST_INTERVAL){
+            maxPressure = getMaxPressure;
+            HPCutOff = maxPressure * .9;
+            }
+  
+    else{
+    digitalWrite(PUMP_RUN_PIN, LOW)
+    sendErrorMessage();
     }
 }
-  
-  
-  
-      
-  else{
-    sendErrorMessage();
-  }
-///////////////////////////
 
-{
-    digitalWrite(PUMP_RUN_PIN, HIGH);
-    delay(PUMP_TEST_DELAY);
-    maxPressure = GetMaxPressure(PRESSURE_DATA_PIN);
-  }
+/*--------------------------------------*/
   float GetMaxPressure(int inputPin)
   {
+    int inputValue;
     float PSI;
     digitalWrite(PUMP_RUN_PIN, HIGH);
     delay(5000);
@@ -111,5 +110,27 @@ void loop()
     PSI = 15.367/(inputValue - 102);
     return PSI;
   }
+
+  float GetPressure(int inputPin)
+  {
+    int inputValue;
+    float PSI;
+    inputValue = analogRead(inputPin);
+    PSI = 15.367/(inputValue - 102);
+    return PSA;
+   }    
+
+  float GetTemperature(int inputPin)
+  {
+    // Fetch temperatures from Dallas sensors  
+    sensors.requestTemperatures();
+    // query conversion time and delay until conversion completed  
+    int16_t conversionTime = sensors.millisToWaitForConversion(sensors.getResolution());
+    delay(conversionTime);
+    // Fetch and round temperature to one decimal    
+    float temp = static_cast<float>(static_cast<int>(sensors.getTempFByIndex(0)) * 10.)) / 10.;
+    return temp;
+   }
+
 }
 int ledPin = 13;                 // LED connected to digital pin 13void setup(){   pinMode(ledPin, OUTPUT);      // sets the digital pin as output}void loop(){   digitalWrite(ledPin, HIGH);   // sets the LED on   delay(1000);                  // waits for a second   digitalWrite(ledPin, LOW);    // sets the LED off   delay(1000);                  // waits for a second}
