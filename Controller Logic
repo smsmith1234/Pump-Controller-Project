@@ -5,7 +5,7 @@
 #define PUMP_RUN_PIN 9
 #define PUMP_TEST_DELAY 5000
 #define MIN_PRESSURE 10
-//#define ONE_WIRE_BUS 3 // Pin where dallas sensor is connected 
+#define ONE_WIRE_BUS 3 // Pin where dallas sensor is connected 
 
 #include <SPI.h>
 #include <DallasTemperature.h>
