@@ -45,59 +45,58 @@ void loop()
     If(highPressureError == false && lowPressureError == false && overTempError == false){
         pressure = getPressure(PRESSURE_DATA_PIN);
         temperature = getTemperature(PRESSURE_DATA_PIN);
-        If(pumpOn = false){
+        If(digitalRead(PUMP_RUN_PIN = false){
             idleTime++;
             }
         else{
             If(temperature <= lastTemperature){
                 overTempCount++;
+                }
+            else{
+                overTempCount--; 
+                }
         }
-      else{
-        overTempCount--; 
-      }
-      
-    switch(pressure){
-      case > maxPressure:
-        digitalWrite(PUMP_RUN_PIN, LOW);
-        highPressureError = true;
-        break;
-      case < MIN_PRESSURE:
-        digitalWrite(PUMP_RUN_PIN, LOW);
-        lowPressureError = true;
-        break;
-      case > HPCutoff:
-        delay(3000);
-        digitalWrite(PUMP_RUN_PIN, LOW);
-        break;
-      case < LPTurnOn:
-        digitalWrite(PUMP_RUN_PIN, HIGH);
-        delay(3000);
-        break;
-      default:
-        break;
-    }
+        switch(pressure){
+            case > maxPressure:
+                digitalWrite(PUMP_RUN_PIN, LOW);
+                highPressureError = true;
+                break;
+            case < MIN_PRESSURE:
+                digitalWrite(PUMP_RUN_PIN, LOW);
+                lowPressureError = true;
+                break;
+            case > HPCutOff:
+                delay(3000);
+                digitalWrite(PUMP_RUN_PIN, LOW);
+                break;
+            case < LPTurnOn:
+                digitalWrite(PUMP_RUN_PIN, HIGH);
+                delay(3000);
+                break;
+            default:
+                break;
+        }
     
-    if(overTempCount > 5){
-      digitalWrite(PUMP_RUN_PIN, LOW);
-      overTempError = true;
-    elseif(overTempCount < 0){
-      overTempCount = 0;
-    }
+        if(overTempCount > 5){
+            digitalWrite(PUMP_RUN_PIN, LOW);
+            overTempError = true;
+            }
+        elseif(overTempCount < 0){
+            overTempCount = 0;
+            }
+        delay(1000);
  
- delay(1000);
- 
- if(timeIdle >= PRESSURE_TEST_INTERVAL){
-      maxPressure = getMaxPressure;
-      HPCutOff = maxPressure * .9;
+        if(timeIdle >= PRESSURE_TEST_INTERVAL){
+            maxPressure = getMaxPressure;
+            HPCutOff = maxPressure * .9;
+            }
+  
+    else{
+    digitalWrite(PUMP_RUN_PIN, LOW)
+    sendErrorMessage();
     }
 }
-  
-  
-  
-      
-  else{
-    sendErrorMessage();
-  }
+
 ///////////////////////////
 
 {
@@ -116,5 +115,10 @@ void loop()
     PSI = 15.367/(inputValue - 102);
     return PSI;
   }
+
+
+
+
+
 }
 int ledPin = 13;                 // LED connected to digital pin 13void setup(){   pinMode(ledPin, OUTPUT);      // sets the digital pin as output}void loop(){   digitalWrite(ledPin, HIGH);   // sets the LED on   delay(1000);                  // waits for a second   digitalWrite(ledPin, LOW);    // sets the LED off   delay(1000);                  // waits for a second}
