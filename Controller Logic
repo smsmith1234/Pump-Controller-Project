@@ -4,12 +4,8 @@
 #define PRESSURE_DATA_PIN 3
 #define PUMP_RUN_PIN 9
 #define PUMP_TEST_DELAY 5000
-//#define ONE_WIRE_BUS 3 // Pin where dallas sensor is connected 
 
 #include <SPI.h>
-//#include <DallasTemperature.h>
-//#include <OneWire.h>
-
 
 uint64_t timeIdle = 0;
 int overTempCount = 0;
@@ -20,9 +16,6 @@ float lastTemperature = 0;
 bool highPressureError = false;
 bool lowPressureError = false;
 bool overTempError = false;
-
-//OneWire oneWire(ONE_WIRE_BUS); // Setup a oneWire instance to communicate with any OneWire devices (not just Maxim/Dallas temperature ICs)
-//DallasTemperature sensors(&oneWire); // Pass the oneWire reference to Dallas Temperature.
 
 void before()
 {
