@@ -12,20 +12,17 @@
 uint64_t PRESSURE_TEST_INTERVAL = 60000;
 uint64_t timeIdle = 0;
 int overTempCount = 0;
-float maxPressure = 0;
-float pressure = 0;
-float HPCutOff = 0;
+int maxPressure = 0;
+int pressure = 0;
+int HPCutOff = 0;
 float temperature = 0;
 float lastTemperature = 0;
-
-bool highPressureError = false;
-bool lowPressureError = false;
-bool overTempError = false;
+int error = 0;
 
 OneWire oneWire(ONE_WIRE_BUS); // Setup a oneWire instance to communicate with any OneWire devices (not just Maxim/Dallas temperature ICs)
 DallasTemperature sensors(&oneWire); // Pass the oneWire reference to Dallas Temperature.
 
-  float GetMaxPressure(int inputPin)
+  int GetMaxPressure(int inputPin)
   {
     int inputValue;
     float PSI;
@@ -35,16 +32,16 @@ DallasTemperature sensors(&oneWire); // Pass the oneWire reference to Dallas Tem
     delay(5000);
     inputValue = analogRead(inputPin);
     PSI = 15.367/(inputValue - 102);
-    return PSI;
+    return static_cast<int>(PSI);
   }
 
-  float GetPressure(int inputPin)
+  int GetPressure(int inputPin)
   {
     int inputValue;
     float PSI;
     inputValue = analogRead(inputPin);
     PSI = 15.367/(inputValue - 102);
-    return PSI;
+    return static_cast<int>(PSI);
    }    
 
   float GetTemperature(int inputPin)
@@ -69,12 +66,12 @@ void setup()
   pinMode(PRESSURE_DATA_PIN, INPUT);
   pinMode(PUMP_RUN_PIN, OUTPUT);
   maxPressure = GetMaxPressure(PRESSURE_DATA_PIN);
-  HPCutOff = maxPressure *.9;  
+  HPCutOff = static_cast<int>(static_cast<float>(maxPressure) *.9);  
 }
 
 void loop()     
 {     
-    if (highPressureError == false && lowPressureError == false && overTempError == false){
+    if (error == 0){
         pressure = GetPressure(PRESSURE_DATA_PIN);
         temperature = GetTemperature(PRESSURE_DATA_PIN);
         if(digitalRead(PUMP_RUN_PIN == false)){
@@ -91,11 +88,11 @@ void loop()
         switch (pressure){
             case > maxPressure:
                 digitalWrite(PUMP_RUN_PIN, LOW);
-                highPressureError = true;
+                error = 1;
                 break;
             case < MIN_PRESSURE:
                 digitalWrite(PUMP_RUN_PIN, LOW);
-                lowPressureError = true;
+                error = 2;
                 break;
             case > HPCutOff:
                 delay(3000);
@@ -111,7 +108,7 @@ void loop()
     
         if(overTempCount > 5){
             digitalWrite(PUMP_RUN_PIN, LOW);
-            overTempError = true;
+            error = 3;
             }
         elseif(overTempCount < 0){
             overTempCount = 0;
@@ -119,8 +116,8 @@ void loop()
         delay(1000);
  
         if(timeIdle >= PRESSURE_TEST_INTERVAL){
-            maxPressure = getMaxPressure;
-            HPCutOff = maxPressure * .9;
+            maxPressure = GetMaxPressure(PRESSURE_DATA_PIN);
+            HPCutOff = static_cast<int>(static_cast<float>(maxPressure) * .9);
             }
   
     else{
