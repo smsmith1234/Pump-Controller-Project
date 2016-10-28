@@ -71,55 +71,57 @@ void setup()
 
 void loop()     
 {     
-    if (error == 0){
-        pressure = GetPressure(PRESSURE_DATA_PIN);
-        temperature = GetTemperature(PRESSURE_DATA_PIN);
-        if(digitalRead(PUMP_RUN_PIN == false)){
-            timeIdle++;
+if(error == 0){
+    pressure = GetPressure(PRESSURE_DATA_PIN);
+    temperature = GetTemperature(PRESSURE_DATA_PIN);
+    if(digitalRead(PUMP_RUN_PIN == false)){  // Pump is off - increment timeIdle
+        timeIdle++;
+        }
+    else{
+        if(temperature <= lastTemperature){  // Pump is on - track temperature deviation
+            overTempCount++;
             }
         else{
-            if(temperature <= lastTemperature){
-                overTempCount++;
-                }
-            else{
-                overTempCount--; 
-                }
+            overTempCount--; 
+            }
         }
-        if(pressure > maxPressure){
-            digitalWrite(PUMP_RUN_PIN, LOW);
-            error = 1;
-            }
-        elseif(pressure < MIN_PRESSURE){
-            digitalWrite(PUMP_RUN_PIN, LOW);
-            error = 2;
+    // Pressure testing section
+    if (pressure > maxPressure){  // Pump is in overpressure condition - turn pump off and generate error
+        digitalWrite(PUMP_RUN_PIN, LOW);
+        error = 1;
         }
-        se > HPCutOff:
-                delay(3000);
-                digitalWrite(PUMP_RUN_PIN, LOW);
-                break;
-            case < LPTurnOn:
-                digitalWrite(PUMP_RUN_PIN, HIGH);
-                delay(3000);
-                break;
-            default:
-                break;
+    else if (pressure < MIN_PRESSURE){  // Pump is in underpressure condition - turn pump off and generate error
+        digitalWrite(PUMP_RUN_PIN, LOW);
+        error = 2;
         }
-    
-        if(overTempCount > 5){
-            digitalWrite(PUMP_RUN_PIN, LOW);
-            error = 3;
-            }
-        elseif(overTempCount < 0){
-            overTempCount = 0;
-            }
-        delay(1000);
- 
-        if(timeIdle >= PRESSURE_TEST_INTERVAL){
-            maxPressure = GetMaxPressure(PRESSURE_DATA_PIN);
-            HPCutOff = static_cast<int>(static_cast<float>(maxPressure) * .9);
-            }
-  
-    else{
+    else if (pressure > HPCutOff){  // Pump is above high pressure cutoff pressure - turn off pump
+        delay(3000);
+        digitalWrite(PUMP_RUN_PIN, LOW);
+        }
+    else if (pressure < LPTurnOn){  // Pump pressure is below turn on pressure - turn on pump
+        digitalWrite(PUMP_RUN_PIN, HIGH);
+        delay(3000);
+        }
+    else{  // Unable to determine state of pump operation - turn off pump and generate error
+        digitalWrite(PUMP_RUN_PIN, LOW);
+        error = 3;
+        }
+    // Temperature testing section    
+    if(overTempCount > 5){  // Temperature is rising - turn off pump and generate error
+        digitalWrite(PUMP_RUN_PIN, LOW);
+        error = 4;
+        }
+    if(overTempCount < 0){  // Temperature is decreasing - limit to maintain rising temp sensitivity
+        overTempCount = 0;
+        }
+    // Wait a second   
+    delay(1000);
+    // Reset max pressure?
+    if(timeIdle >= PRESSURE_TEST_INTERVAL){  // Pump has been idle for a while - get new pressures (max and HP Cutoff)
+        maxPressure = GetMaxPressure(PRESSURE_DATA_PIN);
+        HPCutOff = static_cast<int>(static_cast<float>(maxPressure) * .9);
+        }
+else{  // Something is wrong - turn pump off and send error message
     digitalWrite(PUMP_RUN_PIN, LOW)
     sendErrorMessage();
     }
