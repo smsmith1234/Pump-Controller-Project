@@ -85,16 +85,15 @@ void loop()
                 overTempCount--; 
                 }
         }
-        switch (pressure){
-            case > maxPressure:
-                digitalWrite(PUMP_RUN_PIN, LOW);
-                error = 1;
-                break;
-            case < MIN_PRESSURE:
-                digitalWrite(PUMP_RUN_PIN, LOW);
-                error = 2;
-                break;
-            case > HPCutOff:
+        if(pressure > maxPressure){
+            digitalWrite(PUMP_RUN_PIN, LOW);
+            error = 1;
+            }
+        elseif(pressure < MIN_PRESSURE){
+            digitalWrite(PUMP_RUN_PIN, LOW);
+            error = 2;
+        }
+        se > HPCutOff:
                 delay(3000);
                 digitalWrite(PUMP_RUN_PIN, LOW);
                 break;
