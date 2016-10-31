@@ -19,42 +19,14 @@ float temperature = 0;
 float lastTemperature = 0;
 int error = 0;
 
+int GetMaxPressure(int);
+int GetPressure(int);
+float GetTemperature(int);
+
 OneWire oneWire(ONE_WIRE_BUS); // Setup a oneWire instance to communicate with any OneWire devices (not just Maxim/Dallas temperature ICs)
 DallasTemperature sensors(&oneWire); // Pass the oneWire reference to Dallas Temperature.
 
-  int GetMaxPressure(int inputPin)
-  {
-    int inputValue;
-    float PSI;
-    digitalWrite(PUMP_RUN_PIN, HIGH);
-    delay(5000);
-    digitalWrite(PUMP_RUN_PIN, LOW);
-    delay(5000);
-    inputValue = analogRead(inputPin);
-    PSI = 15.367/(inputValue - 102);
-    return static_cast<int>(PSI);
-  }
 
-  int GetPressure(int inputPin)
-  {
-    int inputValue;
-    float PSI;
-    inputValue = analogRead(inputPin);
-    PSI = 15.367/(inputValue - 102);
-    return static_cast<int>(PSI);
-   }    
-
-  float GetTemperature(int inputPin)
-  {
-    // Fetch temperatures from Dallas sensors  
-    sensors.requestTemperatures();
-    // query conversion time and delay until conversion completed  
-    int16_t conversionTime = sensors.millisToWaitForConversion(sensors.getResolution());
-    delay(conversionTime);
-    // Fetch and round temperature to one decimal    
-    float temp = static_cast<float>(static_cast<int>(sensors.getTempFByIndex(0)) * 10.) / 10.;
-    return temp;
-   }
 
 void setup()  
 { 
@@ -129,3 +101,4 @@ else{  // Something is wrong - turn pump off and send error message
 
 /*--------------------------------------*/
 
+  int GetMaxPressure(int inputPin)  {    int inputValue;    float PSI;    digitalWrite(PUMP_RUN_PIN, HIGH);    delay(5000);    digitalWrite(PUMP_RUN_PIN, LOW);    delay(5000);    inputValue = analogRead(inputPin);    PSI = 15.367/(inputValue - 102);    return static_cast<int>(PSI);  }  int GetPressure(int inputPin)  {    int inputValue;    float PSI;    inputValue = analogRead(inputPin);    PSI = 15.367/(inputValue - 102);    return static_cast<int>(PSI);   }      float GetTemperature(int inputPin)  {    // Fetch temperatures from Dallas sensors      sensors.requestTemperatures();    // query conversion time and delay until conversion completed      int16_t conversionTime = sensors.millisToWaitForConversion(sensors.getResolution());    delay(conversionTime);    // Fetch and round temperature to one decimal        float temp = static_cast<float>(static_cast<int>(sensors.getTempFByIndex(0)) * 10.) / 10.;    return temp;   }
