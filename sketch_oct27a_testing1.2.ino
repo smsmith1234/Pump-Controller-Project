@@ -1,13 +1,20 @@
 //
+
+// Enable debug prints
+#define MY_DEBUG
+
+//Enable selected radio
+#define MY_RADIO_NRF24
+
+#include <SPI.h>
+#include <DallasTemperature.h>
+#include <OneWire.h>
+
 #define PRESSURE_DATA_PIN 3
 #define PUMP_RUN_PIN 9
 #define PUMP_TEST_DELAY 5000
 #define MIN_PRESSURE 10
 #define ONE_WIRE_BUS 3 // Pin where dallas sensor is connected 
-
-#include <SPI.h>
-#include <DallasTemperature.h>
-#include <OneWire.h>
 
 uint64_t PRESSURE_TEST_INTERVAL = 60000;
 uint64_t timeIdle = 0;
@@ -20,10 +27,15 @@ float temperature = 0;
 float lastTemperature = 0;
 int error = 0;
 
+int GetMaxPressure(int);
+int Getpressure(int);
+float GetTemperature(int);
+
 OneWire oneWire(ONE_WIRE_BUS); // Setup a oneWire instance to communicate with any OneWire devices (not just Maxim/Dallas temperature ICs)
 DallasTemperature sensors(&oneWire); // Pass the oneWire reference to Dallas Temperature.
 
-  int GetMaxPressure(int inputPin)
+
+int GetMaxPressure(int inputPin)
   {
     int inputValue;
     float PSI;
@@ -33,21 +45,27 @@ DallasTemperature sensors(&oneWire); // Pass the oneWire reference to Dallas Tem
     delay(5000);
     inputValue = analogRead(inputPin);
     PSI = 15.367/(inputValue - 102);
-    // return static_cast<int>(PSI);
-    return 55;
+    #ifdef MY_DEBUG
+    Serial.print("Max Pressure: );
+    Serialprintln(static_cast<int>(PSI);
+    #endif
+    return static_cast<int>(PSI);
   }
 
-  int GetPressure(int inputPin)
+int GetPressure(int inputPin)
   {
     int inputValue;
     float PSI;
     inputValue = analogRead(inputPin);
     PSI = 15.367/(inputValue - 102);
-    // return static_cast<int>(PSI);
-    return 25;
+    #ifdef MY_DEBUG
+    Serial.print("Pressure: ");
+    Serial.println(static_cast<int>(PSI);
+    #endif     
+    return static_cast<int>(PSI);
    }    
 
-  float GetTemperature(int inputPin)
+float GetTemperature(int inputPin)
   {
     // Fetch temperatures from Dallas sensors  
     sensors.requestTemperatures();
@@ -55,8 +73,11 @@ DallasTemperature sensors(&oneWire); // Pass the oneWire reference to Dallas Tem
     int16_t conversionTime = sensors.millisToWaitForConversion(sensors.getResolution());
     delay(conversionTime);
     // Fetch and round temperature to one decimal    
-    //float temp = static_cast<float>(static_cast<int>(sensors.getTempFByIndex(0)) * 10.) / 10.;
-    float temp = static_cast<float>(static_cast<int>(78.223 * 10.) / 10.);
+    float temp = static_cast<float>(static_cast<int>(sensors.getTempFByIndex(0)) * 10.) / 10.;
+    #ifdef MY_DEBUG
+    Serial.print("Temperature: );
+    Serial.println(temp);
+    #endif
     return temp;
    }
 
@@ -76,17 +97,6 @@ void setup()
 
 void loop()     
 {
-
-  Serial.print(F("Error: " ));    
-  Serial.print(error);
-    Serial.print(F("  pressure: " ));    
-  Serial.print(pressure);
-    Serial.print(F("  maxPressure: " ));    
-  Serial.print(maxPressure);
-    Serial.print(F("  HP Cutoff: " ));    
-  Serial.print(HPCutOff);
-    Serial.print(F("  Temp: " ));    
-  Serial.println(temperature);
 if(error == 0){
     pressure = GetPressure(PRESSURE_DATA_PIN);
     temperature = GetTemperature(PRESSURE_DATA_PIN);
@@ -140,6 +150,9 @@ if(error == 0){
     if(timeIdle >= PRESSURE_TEST_INTERVAL){  // Pump has been idle for a while - get new pressures (max and HP Cutoff)
         maxPressure = GetMaxPressure(PRESSURE_DATA_PIN);
         HPCutOff = static_cast<int>(static_cast<float>(maxPressure) * .9);
+        #ifdef MY_DEBUG
+        Serial.print("HP Cutoff: ");
+        Serial.println(HPCutOff);
         }
 else{  // Something is wrong - turn pump off and send error message
     digitalWrite(PUMP_RUN_PIN, LOW);
