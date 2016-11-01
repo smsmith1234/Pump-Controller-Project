@@ -12,16 +12,15 @@
 
 #define PRESSURE_DATA_PIN 3
 #define PUMP_RUN_PIN 9
-#define PUMP_TEST_DELAY 5000
 #define MIN_PRESSURE 10
+#define LP_TURN_ON 20
 #define ONE_WIRE_BUS 3 // Pin where dallas sensor is connected 
 
-uint64_t PRESSURE_TEST_INTERVAL = 60000;
-uint64_t timeIdle = 0;
+uint32_t PRESSURE_TEST_INTERVAL = 43200000;  // 12 hours
+uint32_t timeIdle = 0;
 int overTempCount = 0;
 int maxPressure = 0;
 int pressure = 0;
-int LPTurnOn = 20;
 int HPCutOff = 0;
 float temperature = 0;
 float lastTemperature = 0;
@@ -97,11 +96,16 @@ void setup()
 
 void loop()     
 {
+#
 if(status < 3){
     pressure = GetPressure(PRESSURE_DATA_PIN);
     temperature = GetTemperature(PRESSURE_DATA_PIN);
     if(status == 0)){  // Pump is off - increment timeIdle
         timeIdle++;
+        #ifdef MY_DEBUG
+        Serial.print("Time idle: "):
+        Serial.println(timeIdle);
+        #endif
         }
     else{
         if(temperature <= lastTemperature){  // Pump is on - track temperature deviation
@@ -110,45 +114,53 @@ if(status < 3){
         else{
             overTempCount--; 
             }
+        #ifdef MY_DEBUG
+        Serial.print("Overtemp Count: ");
+        Serial.println(overTempCount);
+        #endif
         }
     // Pressure testing section
     if (pressure > maxPressure){  // Pump is in overpressure condition - turn pump off and generate error
         digitalWrite(PUMP_RUN_PIN, LOW);
+        delay(60000);
         status = 3;  // Overpressure error
         }
     else if (pressure < MIN_PRESSURE){  // Pump is in underpressure condition - turn pump off and generate error
         digitalWrite(PUMP_RUN_PIN, LOW);
+        delay(60000);  
         status = 4;  //Underpressure error
         }
     else if (pressure > HPCutOff){  // Pump is above high pressure cutoff pressure - turn off pump
-        delay(3000);
+        delay(3000);  // Let pressure build a bit
         digitalWrite(PUMP_RUN_PIN, LOW);
         status = 0;  // Pump is standby
         }
-    else if (pressure < LPTurnOn){  // Pump pressure is below turn on pressure - turn on pump
+    else if (pressure < LP_TURN_ON){  // Pump pressure is below turn on pressure - turn on pump
         digitalWrite(PUMP_RUN_PIN, HIGH);
-        delay(3000);
+        delay(10000);  // Let pump stabilize
         status = 1;  // Pump is commanded on
         }
-    else if (pressure > LPTurnOn && pressure < HPCutOff){  // Pump pressure is normal - let it ride
+    else if (pressure > LP_TURN_ON && pressure < HPCutOff){  // Pump pressure is normal - let it ride
         status = 2;  // Pump is in operation
         //digitalWrite(PUMP_RUN_PIN, HIGH);
         //delay(3000);
         }
     else{  // Unable to determine state of pump operation - turn off pump and generate error
         digitalWrite(PUMP_RUN_PIN, LOW);
+        delay(60000);  
         status = 5;
         }
     // Temperature testing section    
     if(overTempCount > 5){  // Temperature is rising - turn off pump and generate error
         digitalWrite(PUMP_RUN_PIN, LOW);
+        delay(60000);  
         status = 6;
         }
     if(overTempCount < 0){  // Temperature is decreasing - limit to maintain rising temp sensitivity
         overTempCount = 0;
         }
     // Wait a second   
-    delay(1000);
+    delay(1000);  // Minimum time between pressure samples
     // Reset max pressure?
     if(timeIdle >= PRESSURE_TEST_INTERVAL && status < 3){  // Pump has been idle for a while - get new pressures (max and HP Cutoff)
         maxPressure = GetMaxPressure(PRESSURE_DATA_PIN);
@@ -160,7 +172,7 @@ if(status < 3){
     }
 else{  // Something is wrong - turn pump off and send error message
     digitalWrite(PUMP_RUN_PIN, LOW);
-    delay(10000);
+    delay(0000);
     //sendErrorMessage();
     }
   }
