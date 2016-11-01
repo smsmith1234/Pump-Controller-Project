@@ -100,7 +100,7 @@ void loop()
 if(status < 3){
     pressure = GetPressure(PRESSURE_DATA_PIN);
     temperature = GetTemperature(PRESSURE_DATA_PIN);
-    if(digitalRead(PUMP_RUN_PIN == false)){  // Pump is off - increment timeIdle
+    if(status == 0)){  // Pump is off - increment timeIdle
         timeIdle++;
         }
     else{
