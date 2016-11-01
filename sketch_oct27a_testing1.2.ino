@@ -156,7 +156,8 @@ if(status < 3){
         #ifdef MY_DEBUG
         Serial.print("HP Cutoff: ");
         Serial.println(HPCutOff);
-        }
+        #endif    
+    }
 else{  // Something is wrong - turn pump off and send error message
     digitalWrite(PUMP_RUN_PIN, LOW);
     delay(10000);
