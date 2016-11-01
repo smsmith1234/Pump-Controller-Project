@@ -46,7 +46,7 @@ int GetMaxPressure(int inputPin)
     inputValue = analogRead(inputPin);
     PSI = 15.367/(inputValue - 102);
     #ifdef MY_DEBUG
-    Serial.print("Max Pressure: );
+    Serial.print("Max Pressure: ");
     Serialprintln(static_cast<int>(PSI);
     #endif
     return static_cast<int>(PSI);
@@ -75,7 +75,7 @@ float GetTemperature(int inputPin)
     // Fetch and round temperature to one decimal    
     float temp = static_cast<float>(static_cast<int>(sensors.getTempFByIndex(0)) * 10.) / 10.;
     #ifdef MY_DEBUG
-    Serial.print("Temperature: );
+    Serial.print("Temperature: ");
     Serial.println(temp);
     #endif
     return temp;
