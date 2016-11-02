@@ -12,12 +12,13 @@
 
 #define PRESSURE_DATA_PIN 3
 #define PUMP_RUN_PIN 9
+#define LED_PIN 5
 #define MIN_PRESSURE 10
 #define LP_TURN_ON 20
 #define ONE_WIRE_BUS 3 // Pin where dallas sensor is connected 
 
-uint32_t PRESSURE_TEST_INTERVAL = 43200000;  // 12 hours
-uint32_t timeIdle = 0;
+unsigned long PRESSURE_TEST_INTERVAL = 43200000;  // 12 hours
+unsigned long timeIdle = PRESSURE_TEST_INTERVAL;
 int overTempCount = 0;
 int maxPressure = 0;
 int pressure = 0;
@@ -43,13 +44,13 @@ void setup()
   // set up pins
   pinMode(PRESSURE_DATA_PIN, INPUT);
   pinMode(PUMP_RUN_PIN, OUTPUT);
-  timeIdle = PRESSURE_TEST_INTERVAL;  // Trigger max pressure test
+  pinMode(LED_PIN, OUTPUT);
 }
 
 void loop()     
 {
-if(status < 3){
-    // Set max pressure?
+if(status < 3){  // Pump in normal operations
+    // Time to check max pressure?
     if(timeIdle >= PRESSURE_TEST_INTERVAL){  // Pump has been idle for a while - get new pressures (max and HP Cutoff)
         maxPressure = GetMaxPressure(PRESSURE_DATA_PIN);
         HPCutOff = static_cast<int>(static_cast<float>(maxPressure) * .9);
@@ -81,12 +82,12 @@ if(status < 3){
         Serial.println(overTempCount);
         #endif
         }
-    // Pressure testing section
-
+    
+    // Pressure condition testing section
    if (pressure > HPCutOff){  // Pump is above high pressure cutoff pressure - turn off pump
         delay(3000);  // Let pressure build a bit
         digitalWrite(PUMP_RUN_PIN, LOW);
-        status = 0;  // Pump is standby
+        status = 0;  // Pump is in standby
         }
     else if (pressure < LP_TURN_ON){  // Pump pressure is below turn on pressure - turn on pump
         digitalWrite(PUMP_RUN_PIN, HIGH);
@@ -102,17 +103,17 @@ if(status < 3){
         }
     else if (pressure < MIN_PRESSURE){  // Pump is in underpressure condition - turn pump off and generate error
         digitalWrite(PUMP_RUN_PIN, LOW);
-        status = 4;  //Underpressure error
+        status = 4;  // Underpressure error
         }
     else{  // Unable to determine state of pump operation - turn off pump and generate error
         digitalWrite(PUMP_RUN_PIN, LOW);
-        status = 5;
+        status = 5;  // Undetermined error
         }
         
     // Temperature testing section    
-    if(overTempCount > 5){  // Temperature is rising - turn off pump and generate error
+    if(overTempCount > 5 || temperature => 100){  // Temperature is rising - turn off pump and generate error
         digitalWrite(PUMP_RUN_PIN, LOW);
-        status = 6;
+        status = 6;  // Over temp error
        }
     if(overTempCount < 0){  // Temperature is decreasing - limit to maintain rising temp sensitivity
         overTempCount = 0;
@@ -120,12 +121,19 @@ if(status < 3){
         
     // Wait a second   
     delay(1000);  // Minimum time between pressure samples
-}
+    }
 
-else{  // Something is wrong - turn pump off and send error message
+else{  // Something is wrong - turn pump off and flash error code
     digitalWrite(PUMP_RUN_PIN, LOW);
-    delay(60000);
-    //sendErrorMessage();
+    for(int i; i <= 60; i++){
+        for(int j = 0; j <= status; j++){
+            digitalWrite(LED_PIN, HIGH);
+            delay(100);
+            digitalWrite(LED_PIN, LOW);
+            delay(100);
+            }
+        delay(1000);
+        }
     }
 }
 
