@@ -30,6 +30,7 @@ int status = 0;
 int GetMaxPressure(int);
 int Getpressure(int);
 float GetTemperature(int);
+void DisplayStatus(int);
 
 OneWire oneWire(ONE_WIRE_BUS); // Setup a oneWire instance to communicate with any OneWire devices (not just Maxim/Dallas temperature ICs)
 DallasTemperature sensors(&oneWire); // Pass the oneWire reference to Dallas Temperature.
@@ -55,14 +56,12 @@ if(status < 3){  // Pump in normal operations
         maxPressure = GetMaxPressure(PRESSURE_DATA_PIN);
         HPCutOff = static_cast<int>(static_cast<float>(maxPressure) * .9);
         #ifdef MY_DEBUG
-        Serial.print("Max Pressure: ");
-        Serial.println(maxPressure);
         Serial.print("HP Cutoff: ");
         Serial.println(HPCutOff);
         #endif    
         }
     pressure = GetPressure(PRESSURE_DATA_PIN);
-    temperature = GetTemperature(PRESSURE_DATA_PIN);
+    temperature = GetTemperature(ONE_WIRE_BUS);
     if(status == 0){  // Pump is off - increment timeIdle
         timeIdle++;
         #ifdef MY_DEBUG
@@ -125,16 +124,9 @@ if(status < 3){  // Pump in normal operations
 
 else{  // Something is wrong - turn pump off and flash error code
     digitalWrite(PUMP_RUN_PIN, LOW);
-    for(int i; i <= 60; i++){
-        for(int j = 0; j <= status; j++){
-            digitalWrite(LED_PIN, HIGH);
-            delay(100);
-            digitalWrite(LED_PIN, LOW);
-            delay(100);
-            }
-        delay(1000);
-        }
+
     }
+DisplayStatus(status);
 }
 
 /*--------------------------------------*/
@@ -183,3 +175,39 @@ float GetTemperature(int inputPin)
     #endif
     return temp;
    }
+
+void DisplayStatus(int status)
+    {
+    switch(status){
+        case 0:{
+            digitalWrite(LED_PIN, HIGH);
+            break;
+            }
+        case 1:{
+            digitalWrite(LED_PIN, HIGH);
+            delay(100);
+            digitalWrite(LED_PIN, LOW);
+            break;
+            }
+        case 2:{  
+            digitalWrite(LED_PIN, HIGH);
+            delay(100);             
+            digitalWrite(LED_PIN, LOW);            
+            delay(100);    
+            digitalWrite(LED_PIN, HIGH);            
+            delay(100);            
+            digitalWrite(LED_PIN, LOW);
+            break;
+        default:{
+            for(int i; i <= 60; i++){
+                for(int j = 0; j <= status; j++){
+                    digitalWrite(LED_PIN, HIGH);
+                    delay(100);
+                    digitalWrite(LED_PIN, LOW);
+                    delay(100);            
+                    }        
+            delay(1000);        
+            }
+            break;
+        }
+    }
