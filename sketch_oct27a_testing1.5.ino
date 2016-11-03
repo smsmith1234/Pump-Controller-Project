@@ -28,7 +28,7 @@ float lastTemperature = 0;
 int status = 0;
 
 int GetMaxPressure(int);
-int Getpressure(int);
+int GetPressure(int);
 float GetTemperature(int);
 void DisplayStatus(int);
 
