@@ -50,10 +50,6 @@ void setup()
 
 void loop()     
 {
-  Serial.print("Analog pin: ");
-  Serial.println(analogRead(3));
-    Serial.print("Status: ");
-  Serial.println(status);
 if(status < 3){  // Pump in normal operations
     // Time to check max pressure?
     if(timeIdle >= PRESSURE_TEST_INTERVAL){  // Pump has been idle for a while - get new pressures (max and HP Cutoff)
@@ -97,12 +93,12 @@ if(status < 3){  // Pump in normal operations
         status = 4;  // Underpressure error
         }
    
-   else if (pressure >= HPCutOff){  // Pump is above high pressure cutoff pressure - turn off pump
+   else if (pressure >= HPCutOff && pressure < maxPressure){  // Pump is above high pressure cutoff pressure - turn off pump
         delay(3000);  // Let pressure build a bit
         digitalWrite(PUMP_RUN_PIN, LOW);
         status = 0;  // Pump is in standby
         }
-    else if (pressure <= LP_TURN_ON){  // Pump pressure is below turn on pressure - turn on pump
+    else if (pressure <= LP_TURN_ON && pressure > MIN_PRESSURE){  // Pump pressure is below turn on pressure - turn on pump
         digitalWrite(PUMP_RUN_PIN, HIGH);
         delay(10000);  // Let pump stabilize        
         status = 1;  // Pump is commanded on
@@ -133,7 +129,7 @@ else{  // Something is wrong - turn pump off and flash error code
     digitalWrite(PUMP_RUN_PIN, LOW);
 
     }
-        Serial.print("Status: ");
+  Serial.print("Status: ");
   Serial.println(status);
 DisplayStatus(status);
 }
@@ -193,18 +189,10 @@ void DisplayStatus(int status)
             break;
             }
         case 1:{
-            digitalWrite(LED_PIN, HIGH);
-            delay(100);
-            digitalWrite(LED_PIN, LOW);
-            break;
             }
         case 2:{  
             digitalWrite(LED_PIN, HIGH);
-            delay(100);
-            digitalWrite(LED_PIN, LOW);
-            delay(100);
-            digitalWrite(LED_PIN, HIGH);
-            delay(100);
+            delay(200);
             digitalWrite(LED_PIN, LOW);
             break;
             }
