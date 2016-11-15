@@ -62,6 +62,7 @@ if(status < 3){  // Pump in normal operations
         }
         
     pressure = GetPressure(PRESSURE_DATA_PIN);
+    lastTemperature = temperature;
     temperature = GetTemperature(ONE_WIRE_BUS);
     
     if(status == 0){  // Pump is off - increment timeIdle
