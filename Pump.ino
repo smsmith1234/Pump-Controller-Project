@@ -101,7 +101,7 @@ if(status < 3){  // Pump in normal operations
         }
     else if (pressure <= LP_TURN_ON && pressure >= MIN_PRESSURE){  // Pump pressure is below turn on pressure - turn on pump
         digitalWrite(PUMP_RUN_PIN, HIGH);
-        delay(10000);  // Let pump stabilize        
+        delay(2000);  // Let pump stabilize        
         status = 1;  // Pump is commanded on
         }
     else if (pressure >= LP_TURN_ON && pressure < HPCutOff){  // Pump pressure is normal - let it ride
@@ -174,7 +174,7 @@ float GetTemperature(int inputPin)
     int16_t conversionTime = sensors.millisToWaitForConversion(sensors.getResolution());
     delay(conversionTime);
     // Fetch and round temperature to one decimal    
-    float temp = static_cast<float>(static_cast<int>(sensors.getTempFByIndex(0)) * 10.) / 10.;
+    float temp = static_cast<float>(static_cast<int>(sensors.getTempFByIndex(0) * 10.) / 10.);
     #ifdef MY_DEBUG
     Serial.print("Temperature: ");
     Serial.println(temp);
