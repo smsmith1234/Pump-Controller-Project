@@ -19,18 +19,18 @@
 
 unsigned long PRESSURE_TEST_INTERVAL = 43200000;  // 12 hours
 unsigned long timeIdle = PRESSURE_TEST_INTERVAL;
-int overTempCount = 0;
-int maxPressure = 0;
-int pressure = 0;
-int HPCutOff = 0;
+byte overTempCount = 0;
+byte maxPressure = 0;
+byte pressure = 0;
+byte HPCutOff = 0;
 float temperature = 0;
 float lastTemperature = 0;
-int status = 0;
+byte status = 0;
 
-int GetMaxPressure(int);
-int GetPressure(int);
-float GetTemperature(int);
-void DisplayStatus(int);
+byte GetMaxPressure(byte);
+byte GetPressure(byte);
+float GetTemperature(byte);
+void DisplayStatus(byte);
 
 OneWire oneWire(ONE_WIRE_BUS); // Setup a oneWire instance to communicate with any OneWire devices (not just Maxim/Dallas temperature ICs)
 DallasTemperature sensors(&oneWire); // Pass the oneWire reference to Dallas Temperature.
@@ -53,7 +53,7 @@ if(status < 3){  // Pump in normal operations
     // Time to check max pressure?
     if(timeIdle >= PRESSURE_TEST_INTERVAL){  // Pump has been idle for a while - get new pressures (max and HP Cutoff)
         maxPressure = GetMaxPressure(PRESSURE_DATA_PIN);
-        HPCutOff = static_cast<int>(static_cast<float>(maxPressure) * .9);
+        HPCutOff = static_cast<byte>(static_cast<float>(maxPressure) * .9);
         timeIdle=0;
         #ifdef MY_DEBUG
         Serial.print("HP Cutoff: ");
@@ -138,7 +138,7 @@ DisplayStatus(status);
 }
 
 /*--------------------------------------*/
-int GetMaxPressure(int inputPin)
+byte GetMaxPressure(byte inputPin)
   {
     int inputValue;
     float PSI;
@@ -150,12 +150,12 @@ int GetMaxPressure(int inputPin)
     PSI = (inputValue - 102) / 15.367;
     #ifdef MY_DEBUG
     Serial.print("Max Pressure: ");
-    Serial.println(static_cast<int>(PSI));
+    Serial.println(static_cast<byte>(PSI));
     #endif
     return static_cast<int>(PSI);
   }
 
-int GetPressure(int inputPin)
+byte GetPressure(byte inputPin)
   {
     int inputValue;
     float PSI;
@@ -163,12 +163,12 @@ int GetPressure(int inputPin)
     PSI = (inputValue - 102) / 15.367;
     #ifdef MY_DEBUG
     Serial.print("Pressure: ");
-    Serial.println(static_cast<int>(PSI));
+    Serial.println(static_cast<byte>(PSI));
     #endif     
-    return static_cast<int>(PSI);
+    return static_cast<byte>(PSI);
    }    
 
-float GetTemperature(int inputPin)
+float GetTemperature(byte inputPin)
   {
     // Fetch temperatures from Dallas sensors  
     sensors.requestTemperatures();
@@ -184,7 +184,7 @@ float GetTemperature(int inputPin)
     return temp;
    }
 
-void DisplayStatus(int status)
+void DisplayStatus(byte status)
     {
     switch(status){
         case 0:{
@@ -200,8 +200,8 @@ void DisplayStatus(int status)
             break;
             }
         default:{
-            for(int i; i <= 60; i++){
-                for(int j = 0; j <= status; j++){
+            for(byte i; i <= 60; i++){
+                for(byte j = 0; j <= status; j++){
                     digitalWrite(LED_PIN, HIGH);
                     delay(100);
                     digitalWrite(LED_PIN, LOW);
