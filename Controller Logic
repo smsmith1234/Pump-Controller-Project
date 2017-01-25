@@ -16,6 +16,7 @@ int overTempCount = 0;
 float maxPressure = 0;
 float HPCutOff = 0;
 float lastTemperature = 0;
+byte status = 0;
 
 bool highPressureError = false;
 bool lowPressureError = false;
