@@ -50,6 +50,11 @@ void setup()
 
 void loop()     
 {
+/* STATUS: 1 = startup; 2 = norm pressure pump on; 3 = normal pressure pump off; 4 = pressure < LP cut on pump on; 
+           5 = pressure > HP cut off pump off; 6 = pressure > HP cut off pump on; 7 = pressure < LP cut on pump off
+           8 = pressure > over pressure; 9 = pressure < under pressure; 10 = unknown condition; 11 = over temperature
+*/
+  
 if(status < 3){  // Pump in normal operations
     // Time to check max pressure?
     if(timeIdle >= PRESSURE_TEST_INTERVAL){  // Pump has been idle for a while - get new pressures (max and HP Cutoff)
@@ -84,38 +89,51 @@ if(status < 3){  // Pump in normal operations
         }
     
     // Pressure condition testing section
-      if (pressure > maxPressure){  // Pump is in overpressure condition - turn pump off and generate error
+  
+/* STATUS: 1 = startup; 2 = norm pressure pump on; 3 = normal pressure pump off; 4 = pressure < LP cut on pump on; 
+           5 = pressure > HP cut off pump off; 6 = pressure > HP cut off pump on; 7 = pressure < LP cut on pump off
+           8 = pressure > over pressure; 9 = pressure < under pressure
+*/
+  
+   if (pressure > maxPressure){  // Pump is in overpressure condition - turn pump off and generate error
         digitalWrite(PUMP_RUN_PIN, LOW);
-        status = 3;  // Overpressure error
+        status = 8;  // Overpressure error
         }
-    else if (pressure < MIN_PRESSURE){  // Pump is in underpressure condition - turn pump off and generate error
+   else if (pressure < MIN_PRESSURE){  // Pump is in underpressure condition - turn pump off and generate error
         digitalWrite(PUMP_RUN_PIN, LOW);
-        status = 4;  // Underpressure error
+        status = 9;  // Underpressure error
         }
    
-   else if (pressure >= HPCutOff && pressure < maxPressure){  // Pump is above high pressure cutoff pressure - turn off pump
-        delay(3000);  // Let pressure build a bit
-        digitalWrite(PUMP_RUN_PIN, LOW);
-        status = 0;  // Pump is in standby
+   else if (pressure >= HPCutOff && PUMP_RUN_PIN == LOW){  // Pump is above high pressure cutoff pressure - pump in standby
+        status = 5;  // Pressure good and pump is in standby
         }
-    else if (pressure <= LP_TURN_ON && pressure > MIN_PRESSURE){  // Pump pressure is below turn on pressure - turn on pump
+   else if (pressure >= HPCutOff && PUMP_RUN_PIN == HIGH){  // Pump is above high pressure cutoff pressure - turn off pump
+        digitalWrite(PUMP_RUN_PIN, LOW);   
+        status = 6;  // Pressure good now turn off pump
+        }
+    else if (pressure <= LP_TURN_ON && PUMP_RUN_PIN == LOW){  // Pump pressure is below turn on pressure - turn on pump
         digitalWrite(PUMP_RUN_PIN, HIGH);
         delay(10000);  // Let pump stabilize        
-        status = 1;  // Pump is commanded on
+        status = 7;  // Pump is commanded on
         }
-    else if (pressure >= LP_TURN_ON && pressure < HPCutOff){  // Pump pressure is normal - let it ride
-        status = 2;  // Pump is in operation
+    else if (pressure <= LP_TURN_ON && PUMP_RUN_PIN == HIGH){  // Pump pressure is below turn on pressure - pump is on
+        status = 4;  // Lower than desired pressure but pump is running
         }
-
+    else if (pressure >= LP_TURN_ON && pressure <= HPCutOff && PUMP_RUN_PIN == LOW){  // Pump pressure is normal - let it ride
+        status = 2;  // Coasting
+        }
+    else if (pressure >= LP_TURN_ON && pressure <= HPCutOff && PUMP_RUN_PIN == HIGH){  // Pump pressure is normal - let it ride
+        status = 1;  // Pump is in operation
+        }
     else{  // Unable to determine state of pump operation - turn off pump and generate error
         digitalWrite(PUMP_RUN_PIN, LOW);
-        status = 5;  // Undetermined error
+        status = 10;  // Undetermined error
         }
         
     // Temperature testing section    
     if(overTempCount > 5 || temperature >= 100){  // Temperature is rising - turn off pump and generate error
         digitalWrite(PUMP_RUN_PIN, LOW);
-        status = 6;  // Over temp error
+        status = 11;  // Over temp error
        }
     if(overTempCount < 0){  // Temperature is decreasing - limit to maintain rising temp sensitivity
         overTempCount = 0;
