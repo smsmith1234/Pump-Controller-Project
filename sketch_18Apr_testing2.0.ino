@@ -4,27 +4,27 @@
 #define MY_DEBUG
 
 //Enable selected radio
-#define MY_RADIO_NRF24
+//#define MY_RADIO_NRF24
 
 #include <SPI.h>
-#include <DallasTemperature.h>
-#include <OneWire.h>
+//#include <DallasTemperature.h>
+//#include <OneWire.h>
 
 #define PRESSURE_DATA_PIN 3
 #define PUMP_RUN_PIN 9
 #define LED_PIN 5
 #define MIN_PRESSURE 10
 #define LP_TURN_ON 20
-#define ONE_WIRE_BUS 4 // Pin where dallas sensor is connected 
+//#define ONE_WIRE_BUS 4 // Pin where dallas sensor is connected 
 
 unsigned long PRESSURE_TEST_INTERVAL = 43200000;  // 12 hours
-unsigned long timeIdle = PRESSURE_TEST_INTERVAL;
-int overTempCount = 0;
+//unsigned long timeIdle = PRESSURE_TEST_INTERVAL;
+//int overTempCount = 0;
 int maxPressure = 0;
 int pressure = 0;
 int HPCutOff = 0;
-float temperature = 0;
-float lastTemperature = 0;
+//float temperature = 0;
+//float lastTemperature = 0;
 int status = 0;
 
 int GetMaxPressure(int);
@@ -38,10 +38,10 @@ DallasTemperature sensors(&oneWire); // Pass the oneWire reference to Dallas Tem
 void setup()  
 { 
   // Startup up the OneWire library  
-  sensors.begin();
-  Serial.begin(115200);
+  //sensors.begin();
+  //Serial.begin(115200);
   // requestTemperatures() will not block current thread
-  sensors.setWaitForConversion(false);
+  //sensors.setWaitForConversion(false);
   // set up pins
   //pinMode(PRESSURE_DATA_PIN, INPUT);
   pinMode(PUMP_RUN_PIN, OUTPUT);
@@ -55,14 +55,14 @@ void loop()
            8 = pressure > over pressure; 9 = pressure < under pressure; 10 = unknown condition; 11 = over temperature
 */
   
-if(status < 3){  // Pump in normal operations
+if(status < 8){  // Pump in normal operations
     // Time to check max pressure?
-    if(timeIdle >= PRESSURE_TEST_INTERVAL){  // Pump has been idle for a while - get new pressures (max and HP Cutoff)
+    if(status == 0){  // Pump has been idle for a while - get new pressures (max and HP Cutoff)
         maxPressure = GetMaxPressure(PRESSURE_DATA_PIN);
         HPCutOff = static_cast<int>(static_cast<float>(maxPressure) * .9);
-        timeIdle=0;
+        //timeIdle=0;
         #ifdef MY_DEBUG
-        Serial.print("HP Cutoff: ");
+        Serial.print("Status 0 - HP cut off pressure: ");
         Serial.println(HPCutOff);
         #endif    
         }
