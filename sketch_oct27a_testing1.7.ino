@@ -29,11 +29,11 @@ int status = 0;
 
 int GetMaxPressure(int);
 int GetPressure(int);
-float GetTemperature(int);
+//float GetTemperature(int);
 void DisplayStatus(int);
 
-OneWire oneWire(ONE_WIRE_BUS); // Setup a oneWire instance to communicate with any OneWire devices (not just Maxim/Dallas temperature ICs)
-DallasTemperature sensors(&oneWire); // Pass the oneWire reference to Dallas Temperature.
+//OneWire oneWire(ONE_WIRE_BUS); // Setup a oneWire instance to communicate with any OneWire devices (not just Maxim/Dallas temperature ICs)
+//DallasTemperature sensors(&oneWire); // Pass the oneWire reference to Dallas Temperature.
 
 void setup()  
 { 
@@ -41,7 +41,7 @@ void setup()
   sensors.begin();
   Serial.begin(115200);
   // requestTemperatures() will not block current thread
-  sensors.setWaitForConversion(false);
+  //sensors.setWaitForConversion(false);
   // set up pins
   //pinMode(PRESSURE_DATA_PIN, INPUT);
   pinMode(PUMP_RUN_PIN, OUTPUT);
@@ -75,18 +75,18 @@ if(status < 3){  // Pump in normal operations
         Serial.println(timeIdle);
         #endif
         }
-    else{
-        if(temperature < lastTemperature){  // Pump is on - track temperature deviation
-            overTempCount++;
-            }
-        else{
-            overTempCount--; 
-            }
-        #ifdef MY_DEBUG
-        Serial.print("Overtemp Count: ");
-        Serial.println(overTempCount);
-        #endif
-        }
+    //else{
+        //if(temperature < lastTemperature){  // Pump is on - track temperature deviation
+           // overTempCount++;
+        //    }
+        //else{
+        //    overTempCount--; 
+        //    }
+       // #ifdef MY_DEBUG
+       // Serial.print("Overtemp Count: ");
+      //  Serial.println(overTempCount);
+      //  #endif
+      //  }
     
     // Pressure condition testing section
   
@@ -113,7 +113,7 @@ if(status < 3){  // Pump in normal operations
         }
     else if (pressure <= LP_TURN_ON && PUMP_RUN_PIN == LOW){  // Pump pressure is below turn on pressure - turn on pump
         digitalWrite(PUMP_RUN_PIN, HIGH);
-        delay(10000);  // Let pump stabilize        
+        delay(3000);  // Let pump stabilize        
         status = 7;  // Pump is commanded on
         }
     else if (pressure <= LP_TURN_ON && PUMP_RUN_PIN == HIGH){  // Pump pressure is below turn on pressure - pump is on
@@ -131,13 +131,13 @@ if(status < 3){  // Pump in normal operations
         }
         
     // Temperature testing section    
-    if(overTempCount > 5 || temperature >= 100){  // Temperature is rising - turn off pump and generate error
-        digitalWrite(PUMP_RUN_PIN, LOW);
-        status = 11;  // Over temp error
-       }
-    if(overTempCount < 0){  // Temperature is decreasing - limit to maintain rising temp sensitivity
-        overTempCount = 0;
-        }
+    //if(overTempCount > 5 || temperature >= 100){  // Temperature is rising - turn off pump and generate error
+    //    digitalWrite(PUMP_RUN_PIN, LOW);
+     //   status = 11;  // Over temp error
+     //  }
+    //if(overTempCount < 0){  // Temperature is decreasing - limit to maintain rising temp sensitivity
+     //   overTempCount = 0;
+     //   }
         
     // Wait a second   
     delay(1000);  // Minimum time between pressure samples
@@ -149,7 +149,7 @@ else{  // Something is wrong - turn pump off and flash error code
     }
   Serial.print("Status: ");
   Serial.println(status);
-DisplayStatus(status);
+//DisplayStatus(status);
 }
 
 /*--------------------------------------*/
