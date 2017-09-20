@@ -1,7 +1,6 @@
-/* STATUS: 1 = normal pressure; 2 = low pressure (turn on); 3 = high pressure(turn off); 4 = low pressure alarm; 
-						 5 = high pressure alarm  */
+// Super Simple
+// STATUS: 1 = normal pressure; 2 = low pressure (turn on); 3 = high pressure(turn off); 4 = low pressure alarm; 5 = high pressure alarm  */
 
-// Enable debug prints
 #define MY_DEBUG
 
 #define PRESSURE_DATA_PIN 3
@@ -58,7 +57,7 @@ void loop()
 	else if (pressure >= LP_TURN_ON && pressure <= HPCutOff){  
 		status = 1;  // Pressure good - no change
 		}
-	else{ 
+	else { 
 		digitalWrite(PUMP_RUN_PIN, LOW);
 		status = 6;  // Undetermined error
 		}
