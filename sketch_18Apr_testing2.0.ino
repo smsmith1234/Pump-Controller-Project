@@ -27,8 +27,8 @@ void setup()
 
 	#ifdef MY_DEBUG
 	Serial.print("Max pressure: ");
-	Serial.println(maxPressure);
-	Serial.print("HP cut off pressure: ");
+	Serial.print(maxPressure);
+	Serial.print("  HP cut off pressure: ");
 	Serial.println(HPCutOff);
 	#endif 
 }
@@ -64,8 +64,8 @@ void loop()
 	delay(1000);  
 	#ifdef MY_DEBUG
 	Serial.print("Status: ");
-	Serial.println(status);
-	Serial.print("Pressure: ");
+	Serial.print(status);
+	Serial.print("  Pressure: ");
 	Serial.println(pressure);
 	#endif
 }
