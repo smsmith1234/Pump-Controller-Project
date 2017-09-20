@@ -92,9 +92,5 @@ int GetPressure(int inputPin)
     float PSI;
     inputValue = analogRead(inputPin);
     PSI = (inputValue - 102) / 15.367;
-    #ifdef MY_DEBUG
-    Serial.print("Pressure: ");
-    Serial.println(static_cast<int>(PSI));
-    #endif     
     return static_cast<int>(PSI);
    }    
