@@ -6,7 +6,6 @@
 
 #define PRESSURE_DATA_PIN 3
 #define PUMP_RUN_PIN 9
-#define LED_PIN 5
 #define MIN_PRESSURE 10
 #define LP_TURN_ON 20
 
@@ -20,13 +19,13 @@ int GetPressure(int);
 
 void setup()  
 { 
-  pinMode(PRESSURE_DATA_PIN, INPUT);
-  pinMode(PUMP_RUN_PIN, OUTPUT);
-  pinMode(LED_PIN, OUTPUT);
-	
+	pinMode(PRESSURE_DATA_PIN, INPUT);
+	pinMode(PUMP_RUN_PIN, OUTPUT);
+	pinMode(LED_PIN, OUTPUT);
+
 	maxPressure = GetMaxPressure(PRESSURE_DATA_PIN);
 	HPCutOff = static_cast<int>(static_cast<float>(maxPressure) * .9);
-	
+
 	#ifdef MY_DEBUG
 	Serial.println("Status 0");
 	Serial.print("Max pressure: ");
@@ -41,29 +40,29 @@ void loop()
 	pressure = GetPressure(PRESSURE_DATA_PIN);
 	
 	if (pressure > maxPressure){  
-			digitalWrite(PUMP_RUN_PIN, LOW);
-			status = 5;  // Overpressure error
-			}
+		digitalWrite(PUMP_RUN_PIN, LOW);
+		status = 5;  // Overpressure error
+		}
 	else if (pressure < MIN_PRESSURE){  
-			digitalWrite(PUMP_RUN_PIN, LOW);
-			status = 4;  // Underpressure error
-			}   
+		digitalWrite(PUMP_RUN_PIN, LOW);
+		status = 4;  // Underpressure error
+		}   
 	else if (pressure >= HPCutOff && PUMP_RUN_PIN == HIGH){  
-			digitalWrite(PUMP_RUN_PIN, LOW);   
-			status = 3;  // Pressure above cut off - turn off pump
-			}
+		digitalWrite(PUMP_RUN_PIN, LOW);   
+		status = 3;  // Pressure above cut off - turn off pump
+		}
 	else if (pressure <= LP_TURN_ON && PUMP_RUN_PIN == LOW){  // 
-			digitalWrite(PUMP_RUN_PIN, HIGH);     
-			status = 2;  // Pressure below cut on - turn on pump
-			}
+		digitalWrite(PUMP_RUN_PIN, HIGH);     
+		status = 2;  // Pressure below cut on - turn on pump
+		}
 	else if (pressure >= LP_TURN_ON && pressure <= HPCutOff){  
-			status = 1;  // Pressure good - no change
-			}
+		status = 1;  // Pressure good - no change
+		}
 	else{ 
-			digitalWrite(PUMP_RUN_PIN, LOW);
-			status = 6;  // Undetermined error
-			}
-	}
+		digitalWrite(PUMP_RUN_PIN, LOW);
+		status = 6;  // Undetermined error
+		}
+	
 	delay(1000);  
 	#ifdef MY_DEBUG
 	Serial.print("Status: ");
