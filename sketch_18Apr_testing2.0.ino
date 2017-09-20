@@ -26,7 +26,6 @@ void setup()
 	HPCutOff = static_cast<int>(static_cast<float>(maxPressure) * .9);
 
 	#ifdef MY_DEBUG
-	Serial.println("Status 0");
 	Serial.print("Max pressure: ");
 	Serial.println(maxPressure);
 	Serial.print("HP cut off pressure: ");
