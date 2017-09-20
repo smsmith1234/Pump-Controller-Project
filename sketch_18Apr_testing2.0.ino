@@ -1,5 +1,5 @@
 // Super Simple
-// STATUS: 1 = normal pressure; 2 = low pressure (turn on); 3 = high pressure(turn off); 4 = low pressure alarm; 5 = high pressure alarm  */
+// STATUS: 1 = normal pressure; 2 = low pressure (turn on); 3 = high pressure (turn off); 4 = low pressure alarm; 5 = high pressure alarm  */
 
 #define MY_DEBUG
 
