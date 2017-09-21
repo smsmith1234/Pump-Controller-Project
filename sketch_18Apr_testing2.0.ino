@@ -20,7 +20,6 @@ void setup()
 { 
 	pinMode(PRESSURE_DATA_PIN, INPUT);
 	pinMode(PUMP_RUN_PIN, OUTPUT);
-	pinMode(LED_PIN, OUTPUT);
 
 	maxPressure = GetMaxPressure(PRESSURE_DATA_PIN);
 	HPCutOff = static_cast<int>(static_cast<float>(maxPressure) * .9);
