@@ -20,16 +20,19 @@ void setup()
 { 
   pinMode(PRESSURE_DATA_PIN, INPUT);
   pinMode(PUMP_RUN_PIN, OUTPUT);
-pinMode(led, OUTPUT); 
+  pinMode(led, OUTPUT);
+  
   maxPressure = GetMaxPressure(PRESSURE_DATA_PIN);
   HPCutOff = static_cast<int>(static_cast<float>(maxPressure) * .9);
+  
   Serial.begin(9600);
-
+  
+  #ifdef MY_DEBUG
   Serial.print("Max pressure: ");
   Serial.print(maxPressure);
   Serial.print("  HP cut off pressure: ");
   Serial.println(HPCutOff);
-
+  #endif
 }
 
 void loop()     
@@ -38,11 +41,11 @@ void loop()
 
   if (pressure > maxPressure){  
     digitalWrite(PUMP_RUN_PIN, HIGH);
-    status = 5;  // Overpressure error
+    status = 5;  // Overpressure error - turn off pump
   }
   else if (pressure <= MIN_PRESSURE){  
     digitalWrite(PUMP_RUN_PIN, HIGH);
-    status = 4;  // Underpressure error
+    status = 4;  // Underpressure error - turn off pump
   }   
   else if (pressure >= HPCutOff){  
     digitalWrite(PUMP_RUN_PIN, HIGH);   
@@ -53,48 +56,47 @@ void loop()
     status = 2;  // Pressure below cut on - turn on pump
   }
   else if (pressure > LP_TURN_ON && pressure < HPCutOff){  
-    status = 1;  // Pressure good - no change
+    status = 1;  // Pressure good - no change to pump
   }
   else { 
     digitalWrite(PUMP_RUN_PIN, HIGH);
-    status = 6;  // Undetermined error
+    status = 6;  // Undetermined error - turn off pump
   }
 
-  //delay(1000);  
-
+  #ifdef MY_DEBUG
   Serial.print("Status: ");
   Serial.print(status);
   Serial.print("  Pressure: ");
   Serial.print(pressure);
-    Serial.print("  Pump run pin: ");
+  Serial.print("  Pump run pin: ");
   Serial.println(digitalRead(PUMP_RUN_PIN));
-  digitalWrite(led, HIGH);   // turn the LED on (HIGH is the voltage level)
-  delay(1000);               // wait for a second
-  digitalWrite(led, LOW);    // turn the LED off by making the voltage LOW
-  delay(1000);               // wait for a second
+  #endif
+  
+  digitalWrite(led, HIGH);   
+  delay(500);               
+  digitalWrite(led, LOW);    
+  delay(500);              
 }
 
 /*--------------------------------------*/
 int GetMaxPressure(int inputPin)
 {
-  int inputValue;
-  float PSI;
   digitalWrite(PUMP_RUN_PIN, LOW);
   delay(5000);
   digitalWrite(PUMP_RUN_PIN, HIGH);
   delay(5000);
-  inputValue = analogRead(inputPin);
-  PSI = (inputValue - 102) / 15.367;
-  return static_cast<int>(PSI);
+  return map(analogRead(inputPin),100,925,0,60);
+  //inputValue = analogRead(inputPin);
+  //PSI = (inputValue - 102) / 15.367;
+  //return static_cast<int>(PSI);
 }
 
 int GetPressure(int inputPin)
 {
-  int inputValue;
-  float PSI;
-  inputValue = analogRead(inputPin);
-  PSI = (inputValue - 102) / 15.367;
-  return static_cast<int>(PSI);
+  return map(analogRead(inputPin),100,925,0,60);
+  //inputValue = analogRead(inputPin);
+  //PSI = (inputValue - 102) / 15.367;
+  //return static_cast<int>(PSI);
   //return inputValue;
 }    
 
