@@ -1,6 +1,13 @@
 // Super Simple
 // STATUS: 1 = normal pressure; 2 = low pressure (turn on); 3 = high pressure (turn off); 4 = low pressure alarm; 5 = high pressure alarm  */
-// 
+
+#include <Wire.h>
+#include <RTClib.h>
+#include <SPI.h>
+#include <SD.h>
+#include <DHT.h>
+#include <LiquidCrystal_I2C.h>
+
 #define MY_DEBUG
 
 #define PRESSURE_DATA_PIN 3
@@ -12,70 +19,116 @@ int maxPressure = 0;
 int pressure = 0;
 int HPCutOff = 0;
 int status = 0;
-int led = 13;  
+int led = 13;
 int GetMaxPressure(int);
 int GetPressure(int);
 
-void setup()  
-{ 
+/*********************************************SD Card******************************************************/
+
+File myFile;
+const int chipSelect = 4;
+
+/**********************************************RTC*********************************************************/
+
+RTC_DS1307 rtc;
+char daysOfTheWeek[7][12] = {"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"};
+
+/**********************************************DHT*********************************************************/
+
+LiquidCrystal_I2C lcd(0x3F, 16, 2);
+#define DHTPIN 2     // Digital pin connected to the DHT sensor
+#define DHTTYPE DHT22   // DHT 22  (AM2302), AM2321
+DHT dht(DHTPIN, DHTTYPE);
+
+/*********************************************Setup******************************************************/
+
+void setup()
+{
   pinMode(PRESSURE_DATA_PIN, INPUT);
   pinMode(PUMP_RUN_PIN, OUTPUT);
   pinMode(led, OUTPUT);
-  
+
+  lcd.begin();
+  lcd.backlight();
+  lcd.print("Starting up");
+  delay(1000);
+  lcd.clear();
+
+  Serial.begin(9600);
+  if (! rtc.begin()) {
+    lcd.print("Couldn't find RTC");
+    delay(1000);
+    lcd.clear();
+    while (1);
+  }
+  if (! rtc.isrunning()) {
+    lcd.print("RTC is NOT running!");
+    delay(1000);
+    lcd.clear();
+  }
+  lcd.print("Initializing SD card...");
+  delay(1000);
+  lcd.clear();
+  pinMode(SS, OUTPUT);
+  if (!SD.begin(chipSelect)) {
+    lcd.print("init failed!");
+    delay(1000);
+    lcd.clear();
+    return;
+  }
+  lcd.print("SD ready.");
+  delay(1000);
+  lcd.clear();
+  dht.begin();
+
   maxPressure = GetMaxPressure(PRESSURE_DATA_PIN);
   HPCutOff = static_cast<int>(static_cast<float>(maxPressure) * .9);
-  
-  Serial.begin(9600);
-  
-  #ifdef MY_DEBUG
-  Serial.print("Max pressure: ");
-  Serial.print(maxPressure);
-  Serial.print("  HP cut off pressure: ");
-  Serial.println(HPCutOff);
-  #endif
+
+  lcd.print("Max: ");
+  lcd.println(maxPressure);
+  lcd.print("HP CO: ");
+  lcd.println(HPCutOff);
+
 }
 
-void loop()     
+void loop()
 {
   pressure = GetPressure(PRESSURE_DATA_PIN);
 
-  if (pressure > maxPressure){  
+  if (pressure > maxPressure) {
     digitalWrite(PUMP_RUN_PIN, HIGH);
     status = 5;  // Overpressure error - turn off pump
   }
-  else if (pressure <= MIN_PRESSURE){  
+  else if (pressure <= MIN_PRESSURE) {
     digitalWrite(PUMP_RUN_PIN, HIGH);
     status = 4;  // Underpressure error - turn off pump
-  }   
-  else if (pressure >= HPCutOff){  
-    digitalWrite(PUMP_RUN_PIN, HIGH);   
+  }
+  else if (pressure >= HPCutOff) {
+    digitalWrite(PUMP_RUN_PIN, HIGH);
     status = 3;  // Pressure above cut off - turn off pump
   }
-  else if (pressure <= LP_TURN_ON){  // 
-    digitalWrite(PUMP_RUN_PIN, LOW);     
+  else if (pressure <= LP_TURN_ON) { //
+    digitalWrite(PUMP_RUN_PIN, LOW);
     status = 2;  // Pressure below cut on - turn on pump
   }
-  else if (pressure > LP_TURN_ON && pressure < HPCutOff){  
+  else if (pressure > LP_TURN_ON && pressure < HPCutOff) {
     status = 1;  // Pressure good - no change to pump
   }
-  else { 
+  else {
     digitalWrite(PUMP_RUN_PIN, HIGH);
     status = 6;  // Undetermined error - turn off pump
   }
 
-  #ifdef MY_DEBUG
-  Serial.print("Status: ");
-  Serial.print(status);
-  Serial.print("  Pressure: ");
-  Serial.print(pressure);
-  Serial.print("  Pump run pin: ");
-  Serial.println(digitalRead(PUMP_RUN_PIN));
-  #endif
-  
-  digitalWrite(led, HIGH);   
-  delay(500);               
-  digitalWrite(led, LOW);    
-  delay(500);              
+
+  lcd.print("Status: ");
+  lcd.println(status);
+  lcd.print("Pressure: ");
+  lcd.print(pressure);
+
+  digitalWrite(led, HIGH);
+  delay(500);
+  digitalWrite(led, LOW);
+  delay(500);
 }
 
 /*--------------------------------------*/
@@ -85,7 +138,7 @@ int GetMaxPressure(int inputPin)
   delay(5000);
   digitalWrite(PUMP_RUN_PIN, HIGH);
   delay(5000);
-  return map(analogRead(inputPin),100,925,0,60);
+  return map(analogRead(inputPin), 100, 925, 0, 60);
   //inputValue = analogRead(inputPin);
   //PSI = (inputValue - 102) / 15.367;
   //return static_cast<int>(PSI);
@@ -93,9 +146,9 @@ int GetMaxPressure(int inputPin)
 
 int GetPressure(int inputPin)
 {
-  return map(analogRead(inputPin),100,925,0,60);
+  return map(analogRead(inputPin), 100, 925, 0, 60);
   //inputValue = analogRead(inputPin);
   //PSI = (inputValue - 102) / 15.367;
   //return static_cast<int>(PSI);
   //return inputValue;
-}    
+}
